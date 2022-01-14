@@ -112,7 +112,9 @@ impl Message {
             _ => self.source_nickname(),
         }
     }
+}
 
+impl Display for Message {
     /// Converts a Message into a String according to the IRC protocol.
     ///
     /// # Example
@@ -126,7 +128,7 @@ impl Message {
     /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
     /// # }
     /// ```
-    pub fn to_string(&self) -> String {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         let mut ret = String::new();
         if let Some(ref tags) = self.tags {
             ret.push('@');
@@ -147,7 +149,7 @@ impl Message {
         let cmd: String = From::from(&self.command);
         ret.push_str(&cmd);
         ret.push_str("\r\n");
-        ret
+        write!(f, "{}", ret)
     }
 }
 
@@ -257,12 +259,6 @@ impl FromStr for Message {
 impl<'a> From<&'a str> for Message {
     fn from(s: &'a str) -> Message {
         s.parse().unwrap()
-    }
-}
-
-impl Display for Message {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", self.to_string())
     }
 }
 
@@ -550,13 +546,11 @@ mod test {
 
     #[test]
     fn to_message_with_colon_in_suffix() {
-        let msg = "PRIVMSG #test ::test"
-            .parse::<Message>()
-            .unwrap();
+        let msg = "PRIVMSG #test ::test".parse::<Message>().unwrap();
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG("#test".to_string(), ":test".to_string())
+            command: PRIVMSG("#test".to_string(), ":test".to_string()),
         };
         assert_eq!(msg, message);
     }
