@@ -41,7 +41,9 @@ tls-rust = ["tokio-rustls", "webpki-roots"]
 
 
 [dependencies]
-chrono = "0.4.0"
+# chrono = "0.4.0"
+# branch = "time-0.3" (upgrades underlying time dependency to resolve RUSTSEC-2020-0071)
+chrono = { git = "https://github.com/timvisee/chrono", rev = "5292db8" }  
 encoding = "0.2.0"
 futures-util = { version = "0.3.0", default-features = false, features = ["alloc", "sink"] }
 irc-proto = { version = "0.15.0", path = "irc-proto" }

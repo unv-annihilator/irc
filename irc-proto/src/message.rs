@@ -58,7 +58,7 @@ impl Message {
         args: Vec<&str>,
     ) -> Result<Message, error::MessageParseError> {
         Ok(Message {
-            tags: tags,
+            tags,
             prefix: prefix.map(|p| p.into()),
             command: Command::new(command, args)?,
         })
@@ -112,7 +112,9 @@ impl Message {
             _ => self.source_nickname(),
         }
     }
+}
 
+impl Display for Message {
     /// Converts a Message into a String according to the IRC protocol.
     ///
     /// # Example
@@ -126,7 +128,7 @@ impl Message {
     /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
     /// # }
     /// ```
-    pub fn to_string(&self) -> String {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         let mut ret = String::new();
         if let Some(ref tags) = self.tags {
             ret.push('@');
@@ -134,7 +136,7 @@ impl Message {
                 ret.push_str(&tag.0);
                 if let Some(ref value) = tag.1 {
                     ret.push('=');
-                    escape_tag_value(&mut ret, &value);
+                    escape_tag_value(&mut ret, value);
                 }
                 ret.push(';');
             }
@@ -147,7 +149,7 @@ impl Message {
         let cmd: String = From::from(&self.command);
         ret.push_str(&cmd);
         ret.push_str("\r\n");
-        ret
+        write!(f, "{}", ret)
     }
 }
 
@@ -260,12 +262,6 @@ impl<'a> From<&'a str> for Message {
     }
 }
 
-impl Display for Message {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", self.to_string())
-    }
-}
-
 /// A message tag as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
 /// It consists of a tag key, and an optional value for the tag. Each message can contain a number
 /// of tags (in the string format, they are separated by semicolons). Tags are used to add extended
@@ -317,7 +313,7 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         assert_eq!(
             Message::new(None, "PRIVMSG", vec!["test", "Testing!"]).unwrap(),
@@ -389,13 +385,13 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         assert_eq!(&message.to_string()[..], "PRIVMSG test Testing!\r\n");
         let message = Message {
             tags: None,
             prefix: Some("test!test@test".into()),
-            command: PRIVMSG(format!("test"), format!("Still testing!")),
+            command: PRIVMSG("test".to_string(), "Still testing!".to_string()),
         };
         assert_eq!(
             &message.to_string()[..],
@@ -408,7 +404,7 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         assert_eq!(
             "PRIVMSG test :Testing!\r\n".parse::<Message>().unwrap(),
@@ -417,7 +413,7 @@ mod test {
         let message = Message {
             tags: None,
             prefix: Some("test!test@test".into()),
-            command: PRIVMSG(format!("test"), format!("Still testing!")),
+            command: PRIVMSG("test".to_string(), "Still testing!".to_string()),
         };
         assert_eq!(
             ":test!test@test PRIVMSG test :Still testing!\r\n"
@@ -427,12 +423,12 @@ mod test {
         );
         let message = Message {
             tags: Some(vec![
-                Tag(format!("aaa"), Some(format!("bbb"))),
-                Tag(format!("ccc"), None),
-                Tag(format!("example.com/ddd"), Some(format!("eee"))),
+                Tag("aaa".to_string(), Some("bbb".to_string())),
+                Tag("ccc".to_string(), None),
+                Tag("example.com/ddd".to_string(), Some("eee".to_string())),
             ]),
             prefix: Some("test!test@test".into()),
-            command: PRIVMSG(format!("test"), format!("Testing with tags!")),
+            command: PRIVMSG("test".to_string(), "Testing with tags!".to_string()),
         };
         assert_eq!(
             "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
@@ -448,7 +444,7 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         assert_eq!(
             "PRIVMSG test :Testing!\r".parse::<Message>().unwrap(),
@@ -477,14 +473,14 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         let msg: Message = "PRIVMSG test :Testing!\r\n".into();
         assert_eq!(msg, message);
         let message = Message {
             tags: None,
             prefix: Some("test!test@test".into()),
-            command: PRIVMSG(format!("test"), format!("Still testing!")),
+            command: PRIVMSG("test".to_string(), "Still testing!".to_string()),
         };
         let msg: Message = ":test!test@test PRIVMSG test :Still testing!\r\n".into();
         assert_eq!(msg, message);
@@ -498,8 +494,8 @@ mod test {
             tags: None,
             prefix: Some("test!test@test".into()),
             command: Raw(
-                format!("COMMAND"),
-                vec![format!("ARG:test"), format!("Testing!")],
+                "COMMAND".to_string(),
+                vec!["ARG:test".to_string(), "Testing!".to_string()],
             ),
         };
         let msg: Message = ":test!test@test COMMAND ARG:test :Testing!\r\n".into();
@@ -550,13 +546,11 @@ mod test {
 
     #[test]
     fn to_message_with_colon_in_suffix() {
-        let msg = "PRIVMSG #test ::test"
-            .parse::<Message>()
-            .unwrap();
+        let msg = "PRIVMSG #test ::test".parse::<Message>().unwrap();
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG("#test".to_string(), ":test".to_string())
+            command: PRIVMSG("#test".to_string(), ":test".to_string()),
         };
         assert_eq!(msg, message);
     }
