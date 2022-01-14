@@ -440,28 +440,28 @@ impl Command {
                 } else {
                     Command::PASS(args[0].to_owned())
                 }
-            },
+            }
             "NICK" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::NICK(args[0].to_owned())
                 }
-            },
+            }
             "USER" => {
                 if args.len() != 4 {
                     raw(cmd, args)
                 } else {
                     Command::USER(args[0].to_owned(), args[1].to_owned(), args[3].to_owned())
                 }
-            },
+            }
             "OPER" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::OPER(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "MODE" => {
                 if args.is_empty() {
                     raw(cmd, args)
@@ -470,7 +470,7 @@ impl Command {
                 } else {
                     Command::UserMODE(args[0].to_owned(), Mode::as_user_modes(&args[1..])?)
                 }
-            },
+            }
             "SERVICE" => {
                 if args.len() != 6 {
                     raw(cmd, args)
@@ -484,7 +484,7 @@ impl Command {
                         args[5].to_owned(),
                     )
                 }
-            },
+            }
             "QUIT" => {
                 if args.is_empty() {
                     Command::QUIT(None)
@@ -493,14 +493,14 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "SQUIT" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::SQUIT(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "JOIN" => {
                 if args.len() == 1 {
                     Command::JOIN(args[0].to_owned(), None, None)
@@ -515,7 +515,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "PART" => {
                 if args.len() == 1 {
                     Command::PART(args[0].to_owned(), None)
@@ -524,7 +524,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "TOPIC" => {
                 if args.len() == 1 {
                     Command::TOPIC(args[0].to_owned(), None)
@@ -533,7 +533,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "NAMES" => {
                 if args.is_empty() {
                     Command::NAMES(None, None)
@@ -544,7 +544,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "LIST" => {
                 if args.is_empty() {
                     Command::LIST(None, None)
@@ -555,14 +555,14 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "INVITE" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::INVITE(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "KICK" => {
                 if args.len() == 3 {
                     Command::KICK(
@@ -575,21 +575,21 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "PRIVMSG" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::PRIVMSG(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "NOTICE" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::NOTICE(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "MOTD" => {
                 if args.is_empty() {
                     Command::MOTD(None)
@@ -598,7 +598,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "LUSERS" => {
                 if args.is_empty() {
                     Command::LUSERS(None, None)
@@ -609,7 +609,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "VERSION" => {
                 if args.is_empty() {
                     Command::VERSION(None)
@@ -618,7 +618,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "STATS" => {
                 if args.is_empty() {
                     Command::STATS(None, None)
@@ -629,7 +629,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "LINKS" => {
                 if args.is_empty() {
                     Command::LINKS(None, None)
@@ -640,7 +640,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "TIME" => {
                 if args.is_empty() {
                     Command::TIME(None)
@@ -649,14 +649,14 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "CONNECT" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::CONNECT(args[0].to_owned(), args[1].to_owned(), None)
                 }
-            },
+            }
             "TRACE" => {
                 if args.is_empty() {
                     Command::TRACE(None)
@@ -665,7 +665,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "ADMIN" => {
                 if args.is_empty() {
                     Command::ADMIN(None)
@@ -674,7 +674,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "INFO" => {
                 if args.is_empty() {
                     Command::INFO(None)
@@ -683,7 +683,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "SERVLIST" => {
                 if args.is_empty() {
                     Command::SERVLIST(None, None)
@@ -694,14 +694,14 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "SQUERY" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::SQUERY(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "WHO" => {
                 if args.is_empty() {
                     Command::WHO(None, None)
@@ -712,7 +712,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "WHOIS" => {
                 if args.len() == 1 {
                     Command::WHOIS(None, args[0].to_owned())
@@ -721,7 +721,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "WHOWAS" => {
                 if args.len() == 1 {
                     Command::WHOWAS(args[0].to_owned(), None, None)
@@ -736,14 +736,14 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "KILL" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::KILL(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "PING" => {
                 if args.len() == 1 {
                     Command::PING(args[0].to_owned(), None)
@@ -752,7 +752,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "PONG" => {
                 if args.len() == 1 {
                     Command::PONG(args[0].to_owned(), None)
@@ -761,14 +761,14 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "ERROR" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::ERROR(args[0].to_owned())
                 }
-            },
+            }
             "AWAY" => {
                 if args.is_empty() {
                     Command::AWAY(None)
@@ -777,28 +777,28 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "REHASH" => {
                 if args.is_empty() {
                     Command::REHASH
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "DIE" => {
                 if args.is_empty() {
                     Command::DIE
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "RESTART" => {
                 if args.is_empty() {
                     Command::RESTART
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "SUMMON" => {
                 if args.len() == 1 {
                     Command::SUMMON(args[0].to_owned(), None, None)
@@ -813,34 +813,30 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "USERS" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::USERS(Some(args[0].to_owned()))
                 }
-            },
+            }
             "WALLOPS" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::WALLOPS(args[0].to_owned())
                 }
-            },
-            "USERHOST" => {
-                Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect())
-            },
-            "ISON" => {
-                Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect())
-            },
+            }
+            "USERHOST" => Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect()),
+            "ISON" => Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect()),
             "SAJOIN" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::SAJOIN(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "SAMODE" => {
                 if args.len() == 2 {
                     Command::SAMODE(args[0].to_owned(), args[1].to_owned(), None)
@@ -853,70 +849,70 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "SANICK" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::SANICK(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "SAPART" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::SAPART(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "SAQUIT" => {
                 if args.len() != 2 {
                     raw(cmd, args)
                 } else {
                     Command::SAQUIT(args[0].to_owned(), args[1].to_owned())
                 }
-            },
+            }
             "NICKSERV" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::NICKSERV(args[1..].iter().map(|s| s.to_string()).collect())
                 }
-            },
+            }
             "CHANSERV" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::CHANSERV(args[0].to_owned())
                 }
-            },
+            }
             "OPERSERV" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::OPERSERV(args[0].to_owned())
                 }
-            },
+            }
             "BOTSERV" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::BOTSERV(args[0].to_owned())
                 }
-            },
+            }
             "HOSTSERV" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::HOSTSERV(args[0].to_owned())
                 }
-            },
+            }
             "MEMOSERV" => {
                 if args.len() != 1 {
                     raw(cmd, args)
                 } else {
                     Command::MEMOSERV(args[0].to_owned())
                 }
-            },
+            }
             "CAP" => {
                 if args.len() == 1 {
                     if let Ok(cmd) = args[0].parse() {
@@ -964,51 +960,45 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "AUTHENTICATE" => {
                 if args.len() == 1 {
                     Command::AUTHENTICATE(args[0].to_owned())
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "ACCOUNT" => {
                 if args.len() == 1 {
                     Command::ACCOUNT(args[0].to_owned())
                 } else {
                     raw(cmd, args)
                 }
-            },
-            "METADATA" => {
-                match args.len().cmp(&2) {
-                    std::cmp::Ordering::Equal => {
-                        match args[1].parse() {
-                            Ok(c) => Command::METADATA(args[0].to_owned(), Some(c), None),
-                            Err(_) => raw(cmd, args),
-                        }
-                    },
-                    std::cmp::Ordering::Greater => {
-                        match args[1].parse() {
-                            Ok(c) => Command::METADATA(
+            }
+            "METADATA" => match args.len().cmp(&2) {
+                std::cmp::Ordering::Equal => match args[1].parse() {
+                    Ok(c) => Command::METADATA(args[0].to_owned(), Some(c), None),
+                    Err(_) => raw(cmd, args),
+                },
+                std::cmp::Ordering::Greater => match args[1].parse() {
+                    Ok(c) => Command::METADATA(
+                        args[0].to_owned(),
+                        Some(c),
+                        Some(args.into_iter().skip(1).map(|s| s.to_owned()).collect()),
+                    ),
+                    Err(_) => {
+                        if args.len() == 3 {
+                            Command::METADATA(
                                 args[0].to_owned(),
-                                Some(c),
+                                None,
                                 Some(args.into_iter().skip(1).map(|s| s.to_owned()).collect()),
-                            ),
-                            Err(_) => {
-                                if args.len() == 3 {
-                                    Command::METADATA(
-                                        args[0].to_owned(),
-                                        None,
-                                        Some(args.into_iter().skip(1).map(|s| s.to_owned()).collect()),
-                                    )
-                                } else {
-                                    raw(cmd, args)
-                                }
-                            }
+                            )
+                        } else {
+                            raw(cmd, args)
                         }
-                    },
-                    std::cmp::Ordering::Less => raw(cmd, args)
-                }
+                    }
+                },
+                std::cmp::Ordering::Less => raw(cmd, args),
             },
             "MONITOR" => {
                 if args.len() == 2 {
@@ -1018,7 +1008,7 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "BATCH" => {
                 if args.len() == 1 {
                     Command::BATCH(args[0].to_owned(), None, None)
@@ -1033,14 +1023,14 @@ impl Command {
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             "CHGHOST" => {
                 if args.len() == 2 {
                     Command::CHGHOST(args[0].to_owned(), args[1].to_owned())
                 } else {
                     raw(cmd, args)
                 }
-            },
+            }
             _ => {
                 if let Ok(resp) = cmd.parse() {
                     Command::Response(resp, args.into_iter().map(|s| s.to_owned()).collect())
