@@ -487,7 +487,7 @@ impl Stream for ClientStream {
         match ready!(Pin::new(&mut self.as_mut().stream).poll_next(cx)) {
             Some(Ok(msg)) => {
                 self.state.handle_message(&msg)?;
-                return Poll::Ready(Some(Ok(msg)));
+                Poll::Ready(Some(Ok(msg)))
             }
             other => Poll::Ready(other),
         }
@@ -526,7 +526,7 @@ impl ClientState {
     fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
         let msg = msg.into();
         self.handle_sent_message(&msg)?;
-        Ok(self.sender.send(msg)?)
+        self.sender.send(msg)
     }
 
     /// Gets the current nickname in use.
@@ -547,11 +547,8 @@ impl ClientState {
     fn handle_sent_message(&self, msg: &Message) -> error::Result<()> {
         log::trace!("[SENT] {}", msg.to_string());
 
-        match msg.command {
-            PART(ref chan, _) => {
-                let _ = self.chanlists.write().remove(chan);
-            }
-            _ => (),
+        if let PART(ref chan, _) = msg.command {
+            let _ = self.chanlists.write().remove(chan);
         }
 
         Ok(())
@@ -602,7 +599,7 @@ impl ClientState {
                 let joined_chans = self.chanlists.read();
                 for chan in joined_chans
                     .keys()
-                    .filter(|x| config_chans.iter().find(|c| c == x).is_none())
+                    .filter(|x| !config_chans.iter().any(|c| &c == x))
                 {
                     self.send_join(chan)?
                 }
@@ -994,7 +991,7 @@ impl Client {
         let stream = self
             .incoming
             .take()
-            .ok_or_else(|| error::Error::StreamAlreadyConfigured)?;
+            .ok_or(error::Error::StreamAlreadyConfigured)?;
 
         Ok(ClientStream {
             state: Arc::clone(&self.state),
@@ -1115,12 +1112,12 @@ mod test {
 
     pub fn test_config() -> Config {
         Config {
-            owners: vec![format!("test")],
-            nickname: Some(format!("test")),
-            alt_nicks: vec![format!("test2")],
-            server: Some(format!("irc.test.net")),
-            channels: vec![format!("#test"), format!("#test2")],
-            user_info: Some(format!("Testing.")),
+            owners: vec!["test".to_string()],
+            nickname: Some("test".to_string()),
+            alt_nicks: vec!["test2".to_string()],
+            server: Some("irc.test.net".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
+            user_info: Some("Testing.".to_string()),
             use_mock_connection: true,
             ..Default::default()
         }
@@ -1181,8 +1178,8 @@ mod test {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nick_password: Some(format!("password")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nick_password: Some("password".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             ..test_config()
         })
         .await?;
@@ -1200,11 +1197,11 @@ mod test {
         let value = ":irc.test.net 376 test :End of /MOTD command\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             channel_keys: {
                 let mut map = HashMap::new();
-                map.insert(format!("#test2"), format!("password"));
+                map.insert("#test2".to_string(), "password".to_string());
                 map
             },
             ..test_config()
@@ -1224,10 +1221,10 @@ mod test {
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            alt_nicks: vec![format!("test2")],
-            nick_password: Some(format!("password")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            alt_nicks: vec!["test2".to_string()],
+            nick_password: Some("password".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             should_ghost: true,
             ..test_config()
         })
@@ -1247,12 +1244,12 @@ mod test {
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            alt_nicks: vec![format!("test2")],
-            nick_password: Some(format!("password")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            alt_nicks: vec!["test2".to_string()],
+            nick_password: Some("password".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             should_ghost: true,
-            ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
+            ghost_sequence: Some(vec!["RECOVER".to_string(), "RELEASE".to_string()]),
             ..test_config()
         })
         .await?;
@@ -1271,9 +1268,9 @@ mod test {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            umodes: Some(format!("+B")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            umodes: Some("+B".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             ..test_config()
         })
         .await?;
@@ -1309,7 +1306,6 @@ mod test {
         .await?;
         let res = client.stream()?.try_collect::<Vec<_>>().await;
         if let Err(Error::NoUsableNick) = res {
-            ()
         } else {
             panic!("expected error when no valid nicks were specified")
         }
@@ -1320,7 +1316,7 @@ mod test {
     async fn send() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
-            .send(PRIVMSG(format!("#test"), format!("Hi there!")))
+            .send(PRIVMSG("#test".to_string(), "Hi there!".to_string()))
             .is_ok());
         client.stream()?.collect().await?;
         assert_eq!(
@@ -1334,7 +1330,10 @@ mod test {
     async fn send_no_newline_injection() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
-            .send(PRIVMSG(format!("#test"), format!("Hi there!\r\nJOIN #bad")))
+            .send(PRIVMSG(
+                "#test".to_string(),
+                "Hi there!\r\nJOIN #bad".to_string()
+            ))
             .is_ok());
         client.stream()?.collect().await?;
         assert_eq!(
@@ -1392,7 +1391,7 @@ mod test {
         assert_eq!(client.list_channels(), Some(vec!["#test".to_owned()]));
         // we ignore the result, as soon as we queue an outgoing message we
         // update client state, regardless if the queue is available or not.
-        let _ = client.send(PART(format!("#test"), None));
+        let _ = client.send(PART("#test".to_string(), None));
         assert_eq!(client.list_channels(), Some(vec![]));
         Ok(())
     }
@@ -1521,8 +1520,8 @@ mod test {
         let value = ":test!test@test PRIVMSG #test :\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             ..test_config()
         })
         .await?;
@@ -1665,8 +1664,8 @@ mod test {
     #[tokio::test]
     async fn identify_with_password() -> Result<()> {
         let mut client = Client::from_config(Config {
-            nickname: Some(format!("test")),
-            password: Some(format!("password")),
+            nickname: Some("test".to_string()),
+            password: Some("password".to_string()),
             ..test_config()
         })
         .await?;
